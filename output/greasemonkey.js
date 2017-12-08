@@ -5,11 +5,13 @@
 // @description  Run automatic SLU validation from the developer portal language model page.
 // @author       willblas@amazon.com
 // @grant        GM_xmlhttpRequest
+// @grant        GM.xmlHttpRequest
 // @grant        GM_addStyle
 // @connect      *
 // @include      http://developer.amazon.com/*
 // @include      https://developer.amazon.com/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js
+// @require      https://greasemonkey.github.io/gm4-polyfill/gm4-polyfill.js
 // ==/UserScript==
 (function(){"use strict"})();GM_addStyle("#validateModal{      position:fixed;      top: 0;      left: 0;      right: 0;      bottom: 0;      padding: 10%;      display:inline-block;      background-color:rgba(0, 0, 0, 0.5);      z-index: 9999;  }    #backing{      background: #fff;      width: 60%;      height: 100%;      padding: 2em;      overflow: scroll;      margin-left: 20%;  }    #closeButton{      padding:1em;      position: absolute;      top: 1em;      right: 1em;      color: #fff;      font-size: 2em;  }    #copyButton{      padding: 1em;  }    .percentBarHolder{      background: #ccc;      clear: both;      margin-bottom: 1em;      margin-top: .2em;  }    .percentBar{      height: 2em;      background: #FF9900;      float: left;  }    .validateButton{      position:fixed;      bottom: 2em;      right: 2em;      padding: 1em;  }    li.pass{      color: #2a9136;  }  li.fail{      color: #ff0000;  }  li.warn{      color: #B7B700;  }    #testResults{      font-size: 1em;  }    #testResults h1{      font-size: 2em;      border-bottom: 1px solid #000000;      font-weight: bold;      text-transform: uppercase;      padding-top: .1em;      padding-bottom: .2em;      margin-bottom: 0em;  }    #testResults h2{      font-size: 1.5em;      font-weight: bold;      text-transform: uppercase;      margin-top: .8em;      margin-bottom: 0em;  }    #testResults h3{      font-size: 1.2em;      font-weight: bold;      margin-top: .4em;      margin-bottom: 0em;  }    #testResults a{      display: block;      clear: left;      color: #0000ff;  }    #testResults ul {      list-style-position: inside;  }  #testResults li{      margin-left: 1.5em;      list-style: disc !important;  }");//if they've already been loaded, don't load them again
 if(!getHashOfIntents){/*
@@ -28,7 +30,7 @@ function getLastCharacterPositionOfInvocationName(phrase,invocationName){phrase=
      * url: URL of get request
      * callback: function(bool success, str err);
      */
-function getRequestResolves(url,callback){url=url.trim();if(!url.toLowerCase().startsWith("http")){url="https://"+url}console.log("    URL: '"+url+"'");let timeout=setTimeout(function(){callback(false,"Validator Timeout")},4e3);GM_xmlhttpRequest({method:"GET",url:url,context:this,synchronous:false,onload:function(response){clearTimeout(timeout);if(response.status==200){callback(true,null)}else{callback(false,"Non-200 status code: "+response.status)}},onerror:function(response){clearTimeout(timeout);callback(false,"Non-200 status code: "+response.status)},ontimeout:function(respose){clearTimeout(timeout);callback(false,"Timeout")},onabort:function(respose){clearTimeout(timeout);callback(false,"Abort")}})}/*
+function getRequestResolves(url,callback){url=url.trim();if(!url.toLowerCase().startsWith("http")){url="https://"+url}console.log("    URL: '"+url+"'");let timeout=setTimeout(function(){callback(false,"Validator Timeout")},4e3);GM.xmlHttpRequest({method:"GET",url:url,context:this,synchronous:false,onload:function(response){clearTimeout(timeout);if(response.status==200){callback(true,null)}else{callback(false,"Non-200 status code: "+response.status)}},onerror:function(response){clearTimeout(timeout);callback(false,"Non-200 status code: "+response.status)},ontimeout:function(respose){clearTimeout(timeout);callback(false,"Timeout")},onabort:function(respose){clearTimeout(timeout);callback(false,"Abort")}})}/*
      * Get a hash (object) of all intents with the model:
      * IntentName : { <INTENT> };
      */
@@ -260,7 +262,7 @@ tests.push({name:"Short Skill Description (Summary) Exists",description:"Test to
      * Test to check whether Long skill description (Description) exists and has content for every single enabled locale
      * Warns if under 40 length
      */
-tests.push({name:"Long Skill Description (Description) Exists",description:"Test to check whether Long skill description (Description) exists and has content for every single enabled locale. Warns if under 40 length"+"<a href='https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-functional-testing#skill-description'>DOCUMENTATION</a>",run:function(test,metadata,interactionModel,locale,callback){let errors=[];let warnings=[];if(!metadata){console.warn("Metadata does not exist.");callback(null);return}if(!metadata.description){errors.push("Does not have a long skill description (description)")}else if(metadata.description.length<40){warnings.push("Long skill description (description) is short")}callback(test,errors,warnings)}});if(typeof GM_xmlhttpRequest!=="undefined"){/*
+tests.push({name:"Long Skill Description (Description) Exists",description:"Test to check whether Long skill description (Description) exists and has content for every single enabled locale. Warns if under 40 length"+"<a href='https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-functional-testing#skill-description'>DOCUMENTATION</a>",run:function(test,metadata,interactionModel,locale,callback){let errors=[];let warnings=[];if(!metadata){console.warn("Metadata does not exist.");callback(null);return}if(!metadata.description){errors.push("Does not have a long skill description (description)")}else if(metadata.description.length<40){warnings.push("Long skill description (description) is short")}callback(test,errors,warnings)}});if(typeof GM.xmlHttpRequest!=="undefined"){/*
          * Test to check whether Privacy Policy field is enabled and whether the URL resolves successfully for every single enabled locale
          * Warns if no Privacy Policy
          */
